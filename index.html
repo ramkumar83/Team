@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Scholars Map — IIT Bombay</title>
+
+  <link rel="stylesheet" href="css/vendor/leaflet.css" />
+  <script src="js/vendor/leaflet.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Research Scholars Map</h1>
+        <span class="subtitle">IIT Bombay &middot; M.Tech &amp; PhD students by home state</span>
+      </div>
+      <div class="stats">
+        <div class="stat-item"><span class="stat-num" id="statTotal">0</span>Shown</div>
+        <div class="stat-item"><span class="stat-num" id="statPhd">0</span>PhD</div>
+        <div class="stat-item"><span class="stat-num" id="statMtech">0</span>M.Tech</div>
+        <div class="stat-item"><span class="stat-num" id="statStates">0</span>States</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="exportBtn">Export JSON</button>
+        <label class="btn btn-ghost" for="importInput" style="margin:0;">Import JSON</label>
+        <input type="file" id="importInput" accept="application/json" class="hidden" />
+        <button class="btn btn-primary" id="addStudentBtn">+ Add Student</button>
+      </div>
+    </header>
+
+    <div class="body-row">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h2>Search</h2>
+          <input type="text" class="search-input" id="searchInput" placeholder="Name, department, city..." />
+          <select class="filter-select" id="stateFilter"></select>
+        </div>
+
+        <div class="sidebar-section">
+          <h2>Program</h2>
+          <div class="filter-row" id="levelChips"></div>
+        </div>
+
+        <div class="sidebar-section" style="padding-bottom:0; border-bottom:none; flex:0 0 auto;">
+          <h2>Students</h2>
+        </div>
+        <div class="list-wrap" id="studentList"></div>
+
+        <div class="sidebar-footer">
+          <a class="btn btn-secondary" href="README.md" target="_blank" rel="noopener">Help</a>
+        </div>
+      </aside>
+
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Student</h3>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+      </div>
+      <form id="studentForm">
+        <div class="modal-body">
+          <div class="form-row">
+            <label>Full name <span class="required-mark">*</span></label>
+            <input type="text" id="f_name" required />
+          </div>
+
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Program <span class="required-mark">*</span></label>
+              <select id="f_level" required>
+                <option value="PhD">PhD</option>
+                <option value="M.Tech">M.Tech</option>
+                <option value="M.S.">M.S. (Research)</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Status</label>
+              <select id="f_status">
+                <option value="Active">Active</option>
+                <option value="Alumni">Alumni</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Department / Lab</label>
+            <input type="text" id="f_department" placeholder="e.g. Computer Science & Engineering" />
+          </div>
+
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Home state <span class="required-mark">*</span></label>
+              <select id="f_homeState" required></select>
+            </div>
+            <div class="form-row">
+              <label>Home city</label>
+              <input type="text" id="f_homeCity" list="cityDatalist" placeholder="e.g. Kolkata" />
+              <datalist id="cityDatalist"></datalist>
+            </div>
+          </div>
+          <div class="form-hint">If the city isn't recognized, the pin falls back to the state's location. Pick from the suggestions for an accurate city pin.</div>
+
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Joining year</label>
+              <input type="number" id="f_joinYear" min="2000" max="2100" />
+            </div>
+            <div class="form-row">
+              <label>Email (optional)</label>
+              <input type="email" id="f_email" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Notes (optional)</label>
+            <textarea id="f_notes" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger hidden" id="deleteFromModalBtn">Delete</button>
+          <button type="button" class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:var(--accent); color:#fff;">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="js/geo-data.js"></script>
+  <script src="js/seed-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
