@@ -5,7 +5,7 @@
  * Coordinates are approximate (city/state centroid), good enough for a reference map.
  */
 
-const STATE_CENTROIDS = {
+export const STATE_CENTROIDS = {
   "Andhra Pradesh": [15.9129, 79.7400],
   "Arunachal Pradesh": [28.2180, 94.7278],
   "Assam": [26.2006, 92.9376],
@@ -44,10 +44,10 @@ const STATE_CENTROIDS = {
   "Puducherry": [11.9416, 79.8083]
 };
 
-const INDIA_STATES = Object.keys(STATE_CENTROIDS);
+export const INDIA_STATES = Object.keys(STATE_CENTROIDS);
 
 // City -> { lat, lng, state }
-const CITY_COORDS = {
+export const CITY_COORDS = {
   "Mumbai": { lat: 19.0760, lng: 72.8777, state: "Maharashtra" },
   "Pune": { lat: 18.5204, lng: 73.8567, state: "Maharashtra" },
   "Nagpur": { lat: 21.1458, lng: 79.0882, state: "Maharashtra" },
@@ -143,4 +143,4 @@ const CITY_COORDS = {
 };
 
 // Sorted list of city names for the datalist / autocomplete
-const CITY_NAMES = Object.keys(CITY_COORDS).sort();
+export const CITY_NAMES = Object.keys(CITY_COORDS).sort();

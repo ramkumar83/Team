@@ -10,7 +10,6 @@
   --phd: #7c3aed;
   --mtech: #0284c7;
   --other: #d97706;
-  --alumni: #9ca3af;
   --radius: 10px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
 }
@@ -79,7 +78,35 @@ header.topbar {
 
 .topbar .stats .stat-item { text-align: center; }
 
-.topbar .actions { display: flex; gap: 8px; }
+.topbar .actions { display: flex; align-items: center; gap: 8px; }
+
+.signed-in-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  padding: 4px 6px 4px 12px;
+}
+
+.setup-banner {
+  flex: 0 0 auto;
+  background: #fff7ed;
+  border-bottom: 1px solid #fdba74;
+  color: #7c2d12;
+  font-size: 12.5px;
+  padding: 8px 20px;
+}
+.setup-banner a { color: var(--accent-dark); font-weight: 600; }
+
+.form-error {
+  font-size: 12.5px;
+  color: #b91c1c;
+  min-height: 1em;
+}
 
 .btn {
   border: 1px solid transparent;
@@ -227,6 +254,7 @@ select.filter-select {
   border-radius: 50%;
   margin-top: 4px;
   flex: 0 0 auto;
+  border: 2px solid transparent;
 }
 
 .student-item .meta { flex: 1 1 auto; min-width: 0; }
@@ -271,6 +299,7 @@ select.filter-select {
 .legend-box .legend-title { font-weight: 700; margin-bottom: 4px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;}
 .legend-box .legend-row { display: flex; align-items: center; gap: 7px; }
 .legend-box .dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.legend-box .dot.ring { background: #fff; border: 2px solid; box-sizing: border-box; }
 
 /* ---------- Popup content ---------- */
 .leaflet-popup-content { margin: 12px 14px; min-width: 200px; }

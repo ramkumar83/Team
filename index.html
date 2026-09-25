@@ -6,7 +6,6 @@
   <title>Research Scholars Map — IIT Bombay</title>
 
   <link rel="stylesheet" href="css/vendor/leaflet.css" />
-  <script src="js/vendor/leaflet.js"></script>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -24,11 +23,23 @@
       </div>
       <div class="actions">
         <button class="btn btn-ghost" id="exportBtn">Export JSON</button>
-        <label class="btn btn-ghost" for="importInput" style="margin:0;">Import JSON</label>
+        <label class="btn btn-ghost hidden" for="importInput" id="importLabel" style="margin:0;">Import JSON</label>
         <input type="file" id="importInput" accept="application/json" class="hidden" />
-        <button class="btn btn-primary" id="addStudentBtn">+ Add Student</button>
+        <button class="btn btn-primary hidden" id="addStudentBtn">+ Add Student</button>
+        <button class="btn btn-ghost" id="signInBtn">Sign in to edit</button>
+        <div class="signed-in-badge hidden" id="signedInBadge">
+          <span id="signedInEmail"></span>
+          <button class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
+        </div>
       </div>
     </header>
+
+    <div class="setup-banner" id="setupBanner" hidden>
+      Shared data isn't connected yet — this map is running without a backend.
+      See <a href="README.md" target="_blank" rel="noopener">README.md</a> for the
+      one-time Firebase setup (free) so edits sync across every browser and
+      only you can make changes.
+    </div>
 
     <div class="body-row">
       <aside class="sidebar">
@@ -132,10 +143,36 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="authModalOverlay" hidden>
+    <div class="modal" style="width:360px;">
+      <div class="modal-header">
+        <h3>Sign in to edit</h3>
+        <button class="modal-close" id="authModalCloseBtn">&times;</button>
+      </div>
+      <form id="authForm">
+        <div class="modal-body">
+          <div class="form-hint">Viewing the map never requires signing in. Only editing (add/edit/delete/import) does.</div>
+          <div class="form-row">
+            <label>Email</label>
+            <input type="email" id="auth_email" required autocomplete="username" />
+          </div>
+          <div class="form-row">
+            <label>Password</label>
+            <input type="password" id="auth_password" required autocomplete="current-password" />
+          </div>
+          <div class="form-error" id="authError"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="authModalCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:var(--accent); color:#fff;">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
-  <script src="js/geo-data.js"></script>
-  <script src="js/seed-data.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/vendor/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

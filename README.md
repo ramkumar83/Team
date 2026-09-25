@@ -2,58 +2,123 @@
 
 An interactive map of M.Tech and PhD students by home state/city, built for
 tracking research scholars across India. Pins are color-coded by program
-(PhD / M.Tech / M.S. / Other), with a separate muted color for alumni.
+(PhD / M.Tech / M.S. / Other): **active** students are a solid dot in their
+program color, **alumni** are a hollow dashed ring in that same color, so
+program is still readable at a glance and alumni status doesn't get lost in
+one flat gray.
 
-No backend, no build step — it's a static site (HTML/CSS/JS) that runs by
-just opening `index.html`, or hosted for free via GitHub Pages.
+It's a static site (HTML/CSS/JS, no build step) that talks to a free
+Firebase project for data, so:
 
-## Features
+- Everyone who opens the page sees the **same live data**, in real time,
+  from any browser or device.
+- Only someone signed in with the one editor account you create can
+  **add, edit, delete, or import** students. Everyone else gets a
+  read-only view.
 
-- Real India map (OpenStreetMap tiles via Leaflet) with pan/zoom, showing
-  actual state boundaries, cities, and geography.
-- Color-coded pins per student's home city (falls back to the state's
-  location if the city isn't in the built-in list).
-- Multiple students in the same city are grouped into one pin, sized by
-  count, with all names listed in the popup.
-- Sidebar: live search (name/department/city), filter by program, filter
-  by state, and a scrollable roster list — click any student to fly to
-  their pin.
-- Add / Edit / Delete students via a form (modal), or from a pin's popup.
-- Export your roster to a `.json` file (backup), and Import a `.json` file
-  back in.
+## One-time setup (Firebase) — do this first
+
+Without this step the app shows a "not connected" banner and can't load or
+save any students. It takes about 10 minutes and is free for a roster this
+size (Firebase's free "Spark" tier).
+
+1. Go to **https://console.firebase.google.com**, sign in with a Google
+   account, and click **Add project**. Name it anything (e.g. "research-scholars-map").
+   You can skip Google Analytics for this project.
+2. **Create the database:** in the left sidebar, go to **Build → Firestore
+   Database → Create database**. Choose a region close to you, and start in
+   **production mode**.
+3. **Set the security rules:** still in Firestore, open the **Rules** tab
+   and replace the contents with:
+
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /students/{studentId} {
+         allow read: if true;
+         allow write: if request.auth != null;
+       }
+     }
+   }
+   ```
+
+   This lets anyone with the link view the map, but only a signed-in user
+   can write. For tighter security (only *you* can write, even if someone
+   else somehow creates a Firebase account), use this instead, replacing
+   the email with your own sign-in email:
+
+   ```
+   allow write: if request.auth != null
+     && request.auth.token.email == "ram.iitbombay@gmail.com";
+   ```
+
+   Click **Publish** after editing.
+4. **Turn on sign-in:** go to **Build → Authentication → Get started**, click
+   the **Sign-in method** tab, enable **Email/Password**, and save.
+5. **Create your editor account:** in Authentication, go to the **Users**
+   tab → **Add user**, enter the email and password you want to sign in
+   with on the map (e.g. `ram.iitbombay@gmail.com` and a password of your
+   choice). This is the only account that can edit.
+6. **Get your web config:** click the gear icon → **Project settings** →
+   scroll to **Your apps** → click the **`</>`** (web) icon → register an
+   app (any nickname) → it shows a `firebaseConfig` object. Copy the
+   values into `js/firebase-config.js` in this repo, e.g.:
+
+   ```js
+   export const firebaseConfig = {
+     apiKey: "AIzaSy...",
+     authDomain: "research-scholars-map.firebaseapp.com",
+     projectId: "research-scholars-map",
+     storageBucket: "research-scholars-map.firebasestorage.app",
+     messagingSenderId: "123456789",
+     appId: "1:123456789:web:abcdef"
+   };
+   ```
+
+   These values are not secret — Firebase web config is meant to be public;
+   your Firestore rules above are what actually enforce access control.
+7. **Authorize your domain:** still in Authentication, open **Settings →
+   Authorized domains** and add the domain you'll host this on (GitHub
+   Pages' `*.github.io` needs to be added explicitly — `localhost` is
+   already included by default for local testing).
+8. Commit and push `js/firebase-config.js` with your real values, then open
+   the site: click **Sign in to edit** in the header and sign in with the
+   account from step 5.
+
+That's it — from then on, every add/edit/delete you make (from any device,
+once signed in) appears live for every other visitor.
+
+### A privacy note
+
+Step 3's default rule (`allow read: if true`) makes the roster — names,
+home cities, departments, emails if you add them — visible to **anyone
+with the link**, even signed out. That matches "a map I can share," but
+if you'd rather this be private to people you trust, change it to:
+
+```
+allow read: if request.auth != null;
+```
+
+and only create Firebase Authentication accounts for the people who should
+see it (Firebase's free tier supports multiple users, not just one).
 
 ## Running it
 
-Just open `index.html` in a browser — no install needed. Or, to make it
-reachable at a URL for your students/collaborators:
+Open `index.html` in a browser — no install needed, no server required
+beyond the Firebase project above. To make it reachable at a URL:
 
-1. Push this repo to GitHub (already done if you're reading this from the repo).
-2. In the repo's **Settings → Pages**, set the source to the `main` branch, root folder.
-3. GitHub will publish it at `https://<your-username>.github.io/<repo-name>/`.
-
-## How data is stored
-
-All edits (add/edit/delete) are saved to your browser's **local storage** —
-they persist across reloads on the same browser/device, but are **not**
-shared automatically with other people or other devices.
-
-- `js/seed-data.js` is the starting roster loaded the very first time the
-  app runs in a browser (it currently contains 3 placeholder "Sample
-  Student" entries — delete these once you add real students).
-- After that first load, all reads/writes go to local storage only.
-
-**To back up your data or share it with someone else:** click **Export
-JSON** in the header to download your current roster as a file. Someone
-else can then click **Import JSON** and pick that file to load it into
-their browser (this replaces whatever is currently in their browser).
-
-**To make your current roster the new default for anyone opening the app
-for the first time:** export your JSON, then replace the contents of the
-`SEED_STUDENTS` array in `js/seed-data.js` with it, and commit/push.
+1. Push this repo to GitHub.
+2. In the repo's **Settings → Pages**, set the source to your default
+   branch, root folder.
+3. GitHub publishes it at `https://<your-username>.github.io/<repo-name>/`.
+4. Don't forget step 7 above (add that `github.io` URL as an authorized
+   domain in Firebase), or sign-in will fail on the live site.
 
 ## Data format
 
-Each student is a plain object:
+Each student is a document in the Firestore `students` collection (and the
+same shape in Export/Import JSON files):
 
 ```json
 {
@@ -71,31 +136,37 @@ Each student is a plain object:
 ```
 
 - `level`: `"PhD"`, `"M.Tech"`, `"M.S."`, or `"Other"`.
-- `status`: `"Active"` or `"Alumni"` (alumni are shown in a muted gray pin).
+- `status`: `"Active"` or `"Alumni"` (alumni render as a hollow ring instead
+  of a solid dot).
 - `homeCity` should match a name in `js/geo-data.js` (`CITY_COORDS`) for an
   accurate pin; otherwise the pin is placed at the state's approximate
-  center. You can add more cities to that file at any time — it's a plain
-  JS object of `"City": { lat, lng, state }`.
+  center. Add more cities to that file any time — it's a plain object of
+  `"City": { lat, lng, state }`.
 - `homeState` must match one of the names in `INDIA_STATES`
-  (`js/geo-data.js`) so filtering and fallback placement work.
+  (`js/geo-data.js`).
+
+`data/sample-students.json` has 3 example entries (one PhD, one M.Tech, one
+Alumni) you can load via **Import JSON** once signed in, just to see the
+app populated — delete them afterward from the list or their pin popups.
 
 ## File structure
 
 ```
-index.html        Page structure / layout
-css/style.css      Styling
-js/geo-data.js      Indian states + city coordinate lookup
-js/seed-data.js     Starter/placeholder roster
-js/app.js           Map, filters, list, add/edit/delete, import/export
+index.html             Page structure / layout
+css/style.css           Styling
+css/vendor/leaflet.css  Vendored Leaflet stylesheet (+ images/)
+js/vendor/leaflet.js    Vendored Leaflet library
+js/geo-data.js          Indian states + city coordinate lookup
+js/firebase-config.js   Your Firebase project config (fill this in)
+js/app.js               Map, filters, list, auth, Firestore sync, import/export
+data/sample-students.json  Optional example roster to try the app with
 ```
 
 ## Extending it
 
-Some natural next steps if you outgrow local-storage-per-browser:
-
-- Swap local storage for a small shared backend (e.g. a simple database
-  and API) so all edits sync across devices automatically.
 - Add more fields (advisor/co-advisor, funding source, thesis title,
   graduation date, photo).
 - Add a "current city" pin (e.g. IIT Bombay, Powai) with lines connecting
   to each student's home city, to visualize the network at a glance.
+- Give specific reviewers/collaborators read-only sign-in accounts if you
+  tighten the read rule above but still want to share access selectively.
